@@ -1,0 +1,6 @@
+package persistence.entity;
+
+public enum Tipo {
+
+	BASE, EXPANSIÓN, DLC
+}

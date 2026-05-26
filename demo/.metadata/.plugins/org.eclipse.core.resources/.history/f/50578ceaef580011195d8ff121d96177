@@ -1,0 +1,5 @@
+package daw_games.service.Exceptions;
+
+public class GameException {
+
+}

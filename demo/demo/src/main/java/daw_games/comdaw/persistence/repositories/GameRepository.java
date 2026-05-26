@@ -1,0 +1,22 @@
+package daw_games.comdaw.persistence.repositories;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import daw_games.comdaw.persistence.entity.GameEntity;
+
+public interface GameRepository extends JpaRepository<GameEntity, Integer> {
+
+	List<GameEntity> findByGeneroIgnoreCase(String genero);
+
+	List<GameEntity> findByNombreContainingIgnoreCase(String nombre);
+
+	List<GameEntity> findByPlataformasContainingIgnoreCase(String plataforma);
+
+	List<GameEntity> findByTipo(Tipo tipo);
+
+	List<GameEntity> findByPrecioBetween(double min, double max);
+
+	List<GameEntity> findTop5ByOrderByDescargasDesc();
+}

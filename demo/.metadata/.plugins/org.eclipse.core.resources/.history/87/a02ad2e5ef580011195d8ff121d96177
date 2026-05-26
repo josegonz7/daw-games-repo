@@ -1,0 +1,23 @@
+package persistence.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+
+import persistence.entity.Tipo;
+
+public interface GameRepository extends JpaRepository<GameEntity, Integer> {
+
+	List<GameEntity> findByGeneroIgnoreCase(String genero);
+
+	List<GameEntity> findByNombreContainingIgnoreCase(String nombre);
+
+	List<GameEntity> findByPlataformasContainingIgnoreCase(String plataforma);
+
+	List<GameEntity> findByTipo(Tipo tipo);
+
+	List<GameEntity> findByPrecioBetween(double min, double max);
+
+	List<GameEntity> findTop5ByOrderByDescargasDesc();
+}

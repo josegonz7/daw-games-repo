@@ -1,0 +1,107 @@
+package daw_games.comdaw.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import daw_games.comdaw.service.Exception.GameException;
+import daw_games.service.Exceptions.GameNotFoundException;
+import persistence.entity.GameEntity;
+import persistence.entity.Tipo;
+import persistence.repository.GameRepository;
+
+@Service
+public class GameService {
+
+	@Autowired
+	private GameRepository gameRepository;
+
+	public List<GameEntity> findAll() {
+		return this.gameRepository.findAll();
+	}
+
+	public GameEntity findById(int id) {
+		if (!this.gameRepository.existsById(id)) {
+			throw new GameNotFoundException("No se encuentra el juego con id: " + id);
+		}
+		return this.gameRepository.findById(id).get();
+	}
+
+	public GameEntity create(GameEntity g) {
+		g.setId(0);
+		return this.gameRepository.save(g);
+	}
+
+	public GameEntity update(GameEntity g) {
+		GameEntity existente = this.findById(g.getId());
+		
+		existente.setNombre(g.getNombre());
+		existente.setGenero(g.getGenero());
+		existente.setPlataformas(g.getPlataformas());
+		existente.setPrecio(g.getPrecio());
+		existente.setDescargas(g.getDescargas());
+		existente.setFechaLanzamiento(g.getFechaLanzamiento());
+		existente.setTipo(g.getTipo());
+		existente.setCompletado(g.isCompletado());
+		
+		return this.gameRepository.save(existente);
+	}
+
+	public void deleteById(int id) {
+		if (!this.gameRepository.existsById(id)) {
+			throw new GameNotFoundException("No se puede eliminar. No existe el juego con id: " + id);
+		}
+		this.gameRepository.deleteById(id);
+	}
+
+	public List<GameEntity> findByGenero(String genero) {
+		return this.gameRepository.findByGeneroIgnoreCase(genero);
+	}
+
+	public List<GameEntity> findByNombre(String nombre) {
+		return this.gameRepository.findByNombreContainingIgnoreCase(nombre);
+	}
+
+	public List<GameEntity> findByPlataforma(String plataforma) {
+		return this.gameRepository.findByPlataformasContainingIgnoreCase(plataforma);
+	}
+
+	public List<GameEntity> findExpansiones() {
+		return this.gameRepository.findByTipo(Tipo.EXPANSIÓN);
+	}
+
+	public List<GameEntity> findDlcs() {
+		return this.gameRepository.findByTipo(Tipo.DLC);
+	}
+
+	public List<GameEntity> findJuegosBase() {
+		return this.gameRepository.findByTipo(Tipo.BASE);
+	}
+
+	public List<GameEntity> findByPrecio(double min, double max) {
+		return this.gameRepository.findByPrecioBetween(min, max);
+	}
+
+	public List<GameEntity> findExitos() {
+		return this.gameRepository.findTop5ByOrderByDescargasDesc();
+	}
+
+	public GameEntity conmutarCompletado(int id) {
+		GameEntity g = this.findById(id);
+		g.setCompletado(!g.isCompletado());
+		return this.gameRepository.save(g);
+	}
+
+	public void aplicarDescuento(String genero, double porcentaje) {
+		if (porcentaje < 0 || porcentaje > 1) {
+			throw new GameException("El porcentaje debe estar entre 0 y 1.");
+		}
+		List<GameEntity> juegos = this.gameRepository.findByGeneroIgnoreCase(genero);
+		for (GameEntity g : juegos) {
+			double nuevoPrecio = g.getPrecio() * (1 - porcentaje);
+			g.setPrecio(nuevoPrecio);
+			this.gameRepository.save(g);
+		}
+	}
+}

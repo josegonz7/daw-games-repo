@@ -1,0 +1,134 @@
+package daw_games.comdaw.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import daw_games.service.GameService;
+import daw_games.service.Exceptions.GameException;
+import daw_games.service.Exceptions.GameNotFoundException;
+import persistence.entity.GameEntity;
+
+@RestController
+@RequestMapping("/juegos")
+public class gameController {
+
+	@Autowired
+	private GameService gameService;
+
+	@GetMapping
+	public ResponseEntity<List<GameEntity>> list() {
+		return ResponseEntity.ok(this.gameService.findAll());
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<?> findById(@PathVariable int id) {
+		try {
+			return ResponseEntity.ok(this.gameService.findById(id));
+		} catch (GameNotFoundException ex) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+		}
+	}
+
+	@PostMapping
+	public ResponseEntity<?> create(@RequestBody GameEntity gameEntity) {
+		try {
+			return ResponseEntity.status(HttpStatus.CREATED).body(this.gameService.create(gameEntity));
+		} catch (GameException ex) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+		}
+	}
+
+	@PutMapping
+	public ResponseEntity<?> update(@RequestBody GameEntity gameEntity) {
+		try {
+			return ResponseEntity.ok(this.gameService.update(gameEntity));
+		} catch (GameNotFoundException ex) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+		} catch (GameException ex) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+		}
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> delete(@PathVariable int id) {
+		try {
+			this.gameService.deleteById(id);
+			return ResponseEntity.noContent().build();
+		} catch (GameNotFoundException ex) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+		}
+	}
+
+	@PutMapping("/{id}/completar")
+	public ResponseEntity<?> conmutarCompletado(@PathVariable int id) {
+		try {
+			return ResponseEntity.ok(this.gameService.conmutarCompletado(id));
+		} catch (GameNotFoundException ex) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+		} catch (GameException ex) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+		}
+	}
+
+	@PutMapping("/descuento")
+	public ResponseEntity<?> aplicarDescuento(@RequestParam String genero, @RequestParam double porcentaje) {
+		try {
+			this.gameService.aplicarDescuento(genero, porcentaje);
+			return ResponseEntity.ok().build();
+		} catch (GameException ex) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+		}
+	}
+
+	@GetMapping("/genero")
+	public ResponseEntity<List<GameEntity>> getByGenero(@RequestParam String genero) {
+		return ResponseEntity.ok(this.gameService.findByGenero(genero));
+	}
+
+	@GetMapping("/nombre")
+	public ResponseEntity<List<GameEntity>> getByNombre(@RequestParam String nombre) {
+		return ResponseEntity.ok(this.gameService.findByNombre(nombre));
+	}
+
+	@GetMapping("/plataforma")
+	public ResponseEntity<List<GameEntity>> getByPlataforma(@RequestParam String plataforma) {
+		return ResponseEntity.ok(this.gameService.findByPlataforma(plataforma));
+	}
+
+	@GetMapping("/expansiones")
+	public ResponseEntity<List<GameEntity>> getExpansiones() {
+		return ResponseEntity.ok(this.gameService.findExpansiones());
+	}
+
+	@GetMapping("/dlc")
+	public ResponseEntity<List<GameEntity>> getDlcs() {
+		return ResponseEntity.ok(this.gameService.findDlcs());
+	}
+
+	@GetMapping("/base")
+	public ResponseEntity<List<GameEntity>> getJuegosBase() {
+		return ResponseEntity.ok(this.gameService.findJuegosBase());
+	}
+
+	@GetMapping("/precio")
+	public ResponseEntity<List<GameEntity>> getByPrecio(@RequestParam double min, @RequestParam double max) {
+		return ResponseEntity.ok(this.gameService.findByPrecio(min, max));
+	}
+
+	@GetMapping("/exitos")
+	public ResponseEntity<List<GameEntity>> getExitos() {
+		return ResponseEntity.ok(this.gameService.findExitos());
+	}
+}

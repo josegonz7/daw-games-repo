@@ -1,0 +1,5 @@
+package daw_games.comdaw.service;
+
+public class GameService {
+
+}
